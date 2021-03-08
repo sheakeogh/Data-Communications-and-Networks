@@ -12,15 +12,15 @@ public class myServer {
 		int quantity, price;
 		
 		//While there is a next line to read we loop through the text file
-        while(scan.hasNext()) {
-        	s = scan.next();
-        	quantity = scan.nextInt();
-        	price = scan.nextInt();
-        	//Make a new shop and add it to the list
-        	shop details = new shop(s, quantity, price);
-        	list.add(details);
-        }
-        //Close the scanner to reduce leakage
+		while(scan.hasNext()) {
+			s = scan.next();
+			quantity = scan.nextInt();
+			price = scan.nextInt();
+			//Make a new shop and add it to the list
+			shop details = new shop(s, quantity, price);
+			list.add(details);
+		}
+		//Close the scanner to reduce leakage
 		scan.close();
 		//return the list
 		return list;
