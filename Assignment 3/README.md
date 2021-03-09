@@ -1,4 +1,4 @@
-#Assignment 3
+# Assignment 3
 
 You are now asked to write a client application as well as a server application to provide greater stock management functionality.
 
