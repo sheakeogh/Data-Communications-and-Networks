@@ -1,6 +1,8 @@
 import java.io.*; 
 import java.net.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner; 
 
 public class myServer {
 	//Creates a list from the text file
@@ -12,15 +14,15 @@ public class myServer {
 		int quantity, price;
 		
 		//While there is a next line to read we loop through the text file
-		while(scan.hasNext()) {
-			s = scan.next();
-			quantity = scan.nextInt();
-			price = scan.nextInt();
-			//Make a new shop and add it to the list
-			shop details = new shop(s, quantity, price);
-			list.add(details);
-		}
-		//Close the scanner to reduce leakage
+       	 	while(scan.hasNext()) {
+        		s = scan.next();
+        		quantity = scan.nextInt();
+        		price = scan.nextInt();
+        		//Make a new shop and add it to the list
+        		shop details = new shop(s, quantity, price);
+        		list.add(details);
+        	}
+        	//Close the scanner to reduce leakage
 		scan.close();
 		//return the list
 		return list;
@@ -94,7 +96,7 @@ public class myServer {
            		System.out.println("Add name, quantity and price:");
 			outToClient.writeBytes("Add name, quantity and price: \n");
 			//Read the new item, its quantity, and price
-			String newItem = inFromClient.readLine();
+           		String newItem = inFromClient.readLine();
 			System.out.println(newItem);
 			//Using regex split the string into the name, quantity, and price
 			String[] split = newItem.split("\\s+");
@@ -121,14 +123,14 @@ public class myServer {
 	public static void writeToFile(List<shop> list, File file) throws Exception {
         	//Initialize my writing variables
 		FileWriter fw = new FileWriter(file);
-        	BufferedWriter bw = new BufferedWriter(fw);
-        	//Iterate through the list and write into the text file
-        	for(int i = 0; i < list.size(); i++) {
-        		String newDetails = list.get(i).getItem() + " " + list.get(i).getQuantity() + " " + list.get(i).getPrice() + "\n";
-        		bw.write(newDetails);
-       		}
-        	//Close the buffered writer
-        	bw.close();
+		BufferedWriter bw = new BufferedWriter(fw);
+		//Iterate through the list and write into the text file
+		for(int i = 0; i < list.size(); i++) {
+			String newDetails = list.get(i).getItem() + " " + list.get(i).getQuantity() + " " + list.get(i).getPrice() + "\n";
+			bw.write(newDetails);
+		}
+		//Close the buffered writer
+		bw.close();
 	}
 
 	//Main function
@@ -163,10 +165,10 @@ public class myServer {
 			//Ask for product and search for it
 			System.out.println("Ask for a product: ");
 			outToClient.writeBytes("Ask for product: ");
-			product = inFromClient.readLine();
-			System.out.println(product);
-			int itemNum = searchProduct(product, items);
-			if(itemNum != -1) {
+	    		product = inFromClient.readLine();
+	    		System.out.println(product);
+	    		int itemNum = searchProduct(product, items);
+	    		if(itemNum != -1) {
 				//Print the details of this product 
 				System.out.print(((shop)items.get(itemNum)).getDetails());
 				outToClient.writeBytes(((shop)items.get(itemNum)).getDetails());
@@ -176,11 +178,11 @@ public class myServer {
 				request = inFromClient.readLine();
 				//Process this request and carry out the action
 				processRequest(request, itemNum, items, inFromClient, outToClient, file);
-			}
+	    		}
 	    		else if(itemNum == -1) {
-				System.out.println("Invalid Product!");
-				outToClient.writeBytes("Invalid Product!\n");
-			}
+		    		System.out.println("Invalid Product!");
+		   	 	outToClient.writeBytes("Invalid Product!\n");
+	    		}
     		}
 		//Print a goodbye message
 		System.out.println("You have left the Grocery Store! Thank you for Visiting!");
@@ -190,6 +192,5 @@ public class myServer {
 		welcomeSocket.close();
 		//Notify that the server is now down
 		System.out.println("Server Down");
-	}
+    	}
 }
- 
