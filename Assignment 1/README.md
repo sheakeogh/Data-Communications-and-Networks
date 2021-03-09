@@ -4,5 +4,5 @@ Develop a simple server application which responds to a client connection reques
     
     # telnet localhost 1234
 
-### Note:\
+##### Note:
 telnet is a generic client application which can be used to connect to a server and interact with it. As in this exercise the client and the server are in the same machine,  "localhost" is used as hostname.
