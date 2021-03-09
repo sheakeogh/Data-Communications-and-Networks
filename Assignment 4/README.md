@@ -1,0 +1,2 @@
+# Assignment 4
+Using the following media server and client implementations, implement at the client side the means to measure throughput, loss rate, delay and jitter. The media server sends data packets to the client using the datagram transport service (UDP). Each packet contains a sequence number, a time stamp and a 500 byte payload. The throughput, loss, delay, and jitter may be computed by the client periodically using a time interval of 1s.
