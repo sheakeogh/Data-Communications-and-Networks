@@ -1,0 +1,1 @@
+The primary goal of this assignment was to build a server application, which would print a greeting that would contain both the IP address and port number of the client once the client and the server were connected. The client was connected by using Telnet.
