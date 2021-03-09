@@ -1,6 +1,6 @@
 //Shop class to make it easier to access items and perform actions
 class shop {
-  //Declaring variables
+	//Declaring variables
 	private int quantity, price;
 	private String item;
 	
