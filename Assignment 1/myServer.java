@@ -1,4 +1,5 @@
-import java.net.*; 
+import java.net.*;
+import java.io.*; 
   
 class myServer { 
     public static void main(String args[]) throws Exception{
@@ -11,13 +12,16 @@ class myServer {
     	//Hold till contact from the client
     	Socket connectionSocket = welcomeSocket.accept();
     	System.out.println("Connection Made!");
+
+        //Function to send to the client
+        DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream()); 
     	
     	//Variable for Client IP
-    	String ip = connectionSocket.getLocalSocketAddress().toString();
+    	String greeting = "Hello from Server! IP Address: " + connectionSocket.getLocalSocketAddress().toString() + ", Port: " + connectionSocket.getPort();
     	
     	//Print Hello and the IP Address and port number to the monitor
-    	System.out.println("Hello from Server! IP Address: " + ip + ", Port: " + connectionSocket.getPort());
-    	
+    	System.out.println(greeting);
+    	outToClient.writeBytes(greeting);
     	//Close the output stream and welcome socket
     	connectionSocket.close();
     	welcomeSocket.close();
