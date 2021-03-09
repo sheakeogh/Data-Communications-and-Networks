@@ -1,0 +1,5 @@
+Apple 15 3
+Banana 15 5
+Pear 15 8
+Orange 15 4
+Kiwi 15 9
