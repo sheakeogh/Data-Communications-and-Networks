@@ -1,5 +1,15 @@
-There were two primary objectives for this assignment. 
+Assignment 2
 
-The first goal was to create a server application which would read the stock information from a text file, and when the client asks for a product the server would print the information out regarding this product. 
+Exercise 1
+Write a server application which manages an online stock database which stores items along with their quantity and price (e.g widgets, quantity = 100, price = 2cents). The entries can be stored as a text file in the following form:
 
-The second aim for this assignment was to extend on from the server application. The client would not only be able to get information about a product but now also be able to buy, restock, change the price of a product, as well as add a new product to the stock. The text file containing the stock would have to update accordingly. 
+
+    Name1: quantity: price
+    Name 2: quantity: price
+    …………..
+
+
+The server will accept connections from clients; each client sends the name of an item to the server, the server searches for that item’s quantity and price, and returns the information to the server. For more information about processing strings in Java please refer to [1]. For information regarding File IO see [2].
+
+Exercise 2
+Based on the client (telnet) and server modules developed in exercise 1 develop a simple query protocol that allows a client to operate on the online stock database via the server. The operations should include BUY and RESTOCK (changing quatity), ADD (add entry for new item) and PRICE (change item price).
