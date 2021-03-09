@@ -48,20 +48,35 @@ public class myServer {
 	}
 	
 	//Performs the action of the request given by the client
-	public static void processRequest(String request, int num, List<shop> list, BufferedReader inFromClient, DataOutputStream outToClient, File file) throws Exception {
+	public static void processCustomerRequest(String request, int num, int[] arr, List<shop> list, BufferedReader inFromClient, DataOutputStream outToClient, File file) throws Exception {
 		//Check if the request was to buy
-		if(request.equalsIgnoreCase("buy") == true) {
+		if(request.equalsIgnoreCase("yes") == true) {
 			//Call the buy function from the shop class
 			list.get(num).buy();
 			System.out.println("You bought 1 item!");
 			outToClient.writeBytes("You bought 1 item!\n");
+			arr[num]++;
 			//Print the new Stock
 			printStock(list, outToClient);
 	    		//Update the text file
 			writeToFile(list, file);
 		}
 		//Check if the request was to restock
-		else if(request.equalsIgnoreCase("restock") == true) {
+		else if(request.equalsIgnoreCase("no") == true) {
+			System.out.println("Item not bought");
+			outToClient.writeBytes("Item not bought\n");
+		}
+		//If the request was not matched inform the user of an error
+		else {
+           		System.out.println("Invalid Request!");
+			outToClient.writeBytes("Invalid Request!\n");
+		}
+	}
+	
+	//Performs the action of the request given by the client
+	public static void processVendorRequest(String request, int num, List<shop> list, BufferedReader inFromClient, DataOutputStream outToClient, File file) throws Exception {
+		//Check if the request was to restock
+		if(request.equalsIgnoreCase("restock") == true) {
 			//Call the restock function from the shop class
 			list.get(num).restock();
 			System.out.println("You restocked!");
@@ -88,23 +103,8 @@ public class myServer {
 	    		//Update the text file
 	    		writeToFile(list, file);
 		}
-		//Check if the request was to add a new item
-		else if(request.equalsIgnoreCase("add") == true) {
-			//Request for a new item, its quantity, and price
-           		System.out.println("Add name, quantity and price:");
-			outToClient.writeBytes("Add name, quantity and price: \n");
-			//Read the new item, its quantity, and price
-			String newItem = inFromClient.readLine();
-			System.out.println(newItem);
-			//Using regex split the string into the name, quantity, and price
-			String[] split = newItem.split("\\s+");
-			//Make a new shop and add it to the list
-			shop details = new shop(split[0], Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-			list.add(details);
-			//Print the new Stock
-			printStock(list, outToClient);
-			//Update the data.txt file
-			writeToFile(list, file);
+		else if(request.equalsIgnoreCase("purchases") == true) {
+			printPurchases(outToClient);
 		}
 		//Check if the request was to exit		
 		else if(request.equalsIgnoreCase("exit")) {
@@ -116,7 +116,7 @@ public class myServer {
 			outToClient.writeBytes("Invalid Request!\n");
 		}
 	}
-	
+
 	//Update the text file
 	public static void writeToFile(List<shop> list, File file) throws Exception {
         	//Initialize my writing variables
@@ -131,11 +131,41 @@ public class myServer {
         	bw.close();
 	}
 
+	//Update the text file
+	public static void updateDatabase(int cookie, int[] arr, List<shop> list) throws Exception {
+		//Initialize my writing variables
+		File file = new File("customerDatabase.txt");
+		FileWriter fw = new FileWriter(file,true);
+		BufferedWriter bw = new BufferedWriter(fw);
+		String title = "\n" + cookie + "\n";
+		bw.write(title);
+		//Iterate through the list and write into the text file
+		for(int i = 0; i < arr.length; i++) {
+			String newDetails = arr[i] + " " + list.get(i).getItem() + "\n";
+			bw.write(newDetails);
+		}
+		//Close the buffered writer
+		bw.close();
+	}
+	
+	public static void printPurchases(DataOutputStream outToClient) throws Exception {
+		File file = new File("customerDatabase.txt");
+		Scanner scan = new Scanner(file);
+		while(scan.hasNext()) {
+			String str = scan.nextLine();
+			System.out.println(str);
+			outToClient.writeBytes(str + "\n");
+		}
+		scan.close();
+	}
+	
 	//Main function
-    	public static void main(String args[]) throws Exception {
+	public static void main(String args[]) throws Exception {
 		//Initialize variables
 		String product = "";
 		String request = "";
+		String type = "";
+		int cookie = (int)(Math.random() * (10000) + 1000);
 		//Create a welcoming socket with the port 1234
 		ServerSocket welcomeSocket = new ServerSocket(1000);
 		//Once the socket is made print an update
@@ -154,34 +184,70 @@ public class myServer {
 		//Make file variable and create list from data file
 		File file = new File("data.txt");
 		List<shop> items = new ArrayList<shop>(readFile(file));
+		int[] purchases = new int[items.size()];
 		//Print welcome message and list of stock
-		System.out.println("Welcome to the Grocery Store! This is what we have in stock:");
-		outToClient.writeBytes("Welcome to the Grocery Store! This is what we have in stock:\n");		
-		printStock(items, outToClient);
-		//While loop to run the shop if user types exit they leave the shop
-		while(product.equalsIgnoreCase("exit") == false && request.equalsIgnoreCase("exit") == false) {
-			//Ask for product and search for it
-			System.out.println("Ask for a product: ");
-			outToClient.writeBytes("Ask for product: ");
-			product = inFromClient.readLine();
-			System.out.println(product);
-			int itemNum = searchProduct(product, items);
-			if(itemNum != -1) {
-				//Print the details of this product 
-				System.out.print(((shop)items.get(itemNum)).getDetails());
-				outToClient.writeBytes(((shop)items.get(itemNum)).getDetails());
-				//Ask for a request and see what they want to do with the product
-				System.out.println("What would you like to do? Buy, Restock, Change Price or Add New Item: ");
-				outToClient.writeBytes("What would you like to do? Buy, Restock, Change Price or Add New Item: ");
-				request = inFromClient.readLine();
-				//Process this request and carry out the action
-				processRequest(request, itemNum, items, inFromClient, outToClient, file);
-			}
-	    		else if(itemNum == -1) {
-				System.out.println("Invalid Product!");
-				outToClient.writeBytes("Invalid Product!\n");
-			}
-    		}
+		System.out.println("Welcome to the Grocery Store!\nAre you a customer or a vendor?");
+		outToClient.writeBytes("Welcome to the Grocery Store!\nAre you a customer or a vendor?\n");		
+		type = inFromClient.readLine();
+		if(type.equalsIgnoreCase("Customer") == true) {		
+			System.out.println("Customer");
+			outToClient.writeBytes("Customer");
+			printStock(items, outToClient);
+			//While loop to run the shop if user types exit they leave the shop
+			while(product.equalsIgnoreCase("exit") == false && request.equalsIgnoreCase("exit") == false) {
+				//Ask for product and search for it
+				System.out.println("Ask for a product: ");
+				outToClient.writeBytes("Ask for product: ");
+				product = inFromClient.readLine();
+				System.out.println(product);
+				int itemNum = searchProduct(product, items);
+				if(itemNum != -1) {
+					//Print the details of this product 
+					System.out.print(((shop)items.get(itemNum)).getDetails());
+					outToClient.writeBytes(((shop)items.get(itemNum)).getDetails());
+					//Ask for a request and see what they want to do with the product
+					System.out.println("Would you like to buy this product? ");
+					outToClient.writeBytes("Would you like to buy this product? ");
+					request = inFromClient.readLine();
+					//Process this request and carry out the action
+					processCustomerRequest(request, itemNum, purchases, items, inFromClient, outToClient, file);
+				}
+		    		else if(itemNum == -1) {
+		    			System.out.println("Invalid Product!");
+		    			outToClient.writeBytes("Invalid Product!\n");
+				}
+    			}
+			updateDatabase(cookie, purchases, items);
+		}
+		else if(type.equalsIgnoreCase("Vendor") == true) {	
+			System.out.println("Vendor");
+			outToClient.writeBytes("Vendor");
+			printStock(items, outToClient);
+			//While loop to run the shop if user types exit they leave the shop
+			while(product.equalsIgnoreCase("exit") == false && request.equalsIgnoreCase("exit") == false) {
+				//Ask for product and search for it
+				System.out.println("Ask for a product: ");
+				outToClient.writeBytes("Ask for product: ");
+				product = inFromClient.readLine();
+				System.out.println(product);
+				int itemNum = searchProduct(product, items);
+				if(itemNum != -1) {
+					//Print the details of this product 
+					System.out.print(((shop)items.get(itemNum)).getDetails());
+					outToClient.writeBytes(((shop)items.get(itemNum)).getDetails());
+					//Ask for a request and see what they want to do with the product
+					System.out.println("What would you like to do? Restock, Change Price or Check Purchases: ");
+					outToClient.writeBytes("What would you like to do? Restock, Change Price or Check Purchases: ");
+					request = inFromClient.readLine();
+					//Process this request and carry out the action
+					processVendorRequest(request, itemNum, items, inFromClient, outToClient, file);
+				}
+		    		else if(itemNum == -1) {
+		    			System.out.println("Invalid Product!");
+		    			outToClient.writeBytes("Invalid Product!\n");
+				}
+    			}
+		}			
 		//Print a goodbye message
 		System.out.println("You have left the Grocery Store! Thank you for Visiting!");
 		outToClient.writeBytes("You have left the Grocery Store! Thank you for Visiting!");
