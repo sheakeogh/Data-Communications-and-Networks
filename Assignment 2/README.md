@@ -5,7 +5,7 @@ Write a server application which manages an online stock database which stores i
 
     Name1: quantity: price
     Name 2: quantity: price
-    …………..
+    . . . . . . . . . . . .
 
 The server will accept connections from clients; each client sends the name of an item to the server, the server searches for that item’s quantity and price, and returns the information to the server.
 
